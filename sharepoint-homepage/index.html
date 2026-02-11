@@ -1,0 +1,2108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OneDrive & SharePoint</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+
+    /* ===== Top Bar ===== */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      background: #0078d4;
+      height: 48px;
+      padding: 0 12px;
+      color: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .top-bar .app-launcher {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      opacity: .85;
+      transition: opacity .2s;
+    }
+    .top-bar .app-launcher:hover { opacity: 1; }
+    .top-bar .brand {
+      font-size: 16px;
+      font-weight: 600;
+      margin-right: 24px;
+      cursor: pointer;
+    }
+    .top-bar .search-box {
+      flex: 0 1 400px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .top-bar .search-box input {
+      width: 100%;
+      height: 32px;
+      border: none;
+      border-radius: 4px;
+      padding: 0 12px 0 36px;
+      font-size: 14px;
+      background: rgba(255,255,255,.85);
+      outline: none;
+      transition: background .2s;
+    }
+    .top-bar .search-box input:focus { background: #fff; }
+    .top-bar .search-box .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #666;
+      font-size: 14px;
+    }
+    .top-bar .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: auto;
+    }
+    .top-bar .top-actions .icon-btn {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: background .2s;
+      font-size: 16px;
+      color: #fff;
+      border: none;
+      background: transparent;
+    }
+    .top-bar .top-actions .icon-btn:hover { background: rgba(255,255,255,.15); }
+    .top-bar .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #005a9e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 2px solid rgba(255,255,255,.4);
+    }
+
+    /* ===== Site Nav ===== */
+    .site-nav {
+      display: flex;
+      align-items: center;
+      background: #fff;
+      border-bottom: 1px solid #e1e1e1;
+      padding: 0 20px;
+      height: 44px;
+      overflow-x: auto;
+    }
+    .site-nav a {
+      text-decoration: none;
+      color: #333;
+      font-size: 13px;
+      padding: 0 12px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      white-space: nowrap;
+      border-bottom: 2px solid transparent;
+      transition: border-color .2s, color .2s;
+    }
+    .site-nav a:hover { color: #0078d4; border-bottom-color: #0078d4; }
+    .site-nav a.has-dropdown::after { content: ' ▾'; font-size: 10px; margin-left: 4px; }
+
+    /* ===== Site Header ===== */
+    .site-header {
+      display: flex;
+      align-items: center;
+      background: #fff;
+      padding: 12px 20px;
+      border-bottom: 1px solid #e1e1e1;
+    }
+    .site-header .site-logo {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #0078d4, #005a9e);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 11px;
+      text-align: center;
+      line-height: 1.2;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+    .site-header .site-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+    }
+    .site-header .site-meta {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 13px;
+      color: #666;
+    }
+    .site-header .site-meta a {
+      color: #0078d4;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .site-header .site-meta a:hover { text-decoration: underline; }
+
+    /* ===== README Badge ===== */
+    .readme-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-left: 14px;
+      padding: 3px 9px 3px 6px;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      background: transparent;
+      color: #bbb;
+      font-size: 10.5px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      letter-spacing: .2px;
+      cursor: pointer;
+      transition: all .3s ease;
+      position: relative;
+      white-space: nowrap;
+      outline: none;
+      vertical-align: middle;
+    }
+    .readme-badge .readme-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 14px;
+      height: 14px;
+      transition: transform .2s;
+    }
+    .readme-badge .readme-icon svg {
+      width: 13px;
+      height: 13px;
+    }
+    .readme-badge:hover {
+      border-color: #0078d4;
+      color: #0078d4;
+      background: rgba(0, 120, 212, .05);
+      box-shadow: 0 1px 4px rgba(0, 120, 212, .12);
+    }
+    .readme-badge:hover .readme-icon { transform: scale(1.1); }
+    .readme-badge:active { transform: scale(.97); }
+
+    /* README badge tooltip */
+    .readme-badge .readme-tip {
+      position: absolute;
+      top: calc(100% + 10px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #2b2b2b;
+      color: #eee;
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 12px;
+      line-height: 1.5;
+      padding: 10px 16px;
+      border-radius: 8px;
+      white-space: normal;
+      width: 260px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease .15s;
+      z-index: 60;
+      letter-spacing: 0;
+      text-align: left;
+      box-shadow: 0 4px 16px rgba(0,0,0,.2);
+    }
+    .readme-badge .readme-tip::before {
+      content: '';
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 7px solid transparent;
+      border-bottom-color: #2b2b2b;
+    }
+    .readme-badge .readme-tip strong {
+      display: block;
+      margin-bottom: 3px;
+      color: #fff;
+      font-size: 12.5px;
+    }
+    .readme-badge:hover .readme-tip { opacity: 1; }
+
+    /* ===== README Overlay ===== */
+    .readme-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .45);
+      z-index: 500;
+      padding: 20px;
+      backdrop-filter: blur(2px);
+    }
+    .readme-overlay.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: readmeFadeIn .2s ease;
+    }
+    @keyframes readmeFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .readme-modal {
+      background: #fff;
+      border-radius: 12px;
+      width: 100%;
+      height: 100%;
+      max-width: 1400px;
+      max-height: 94vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+      overflow: hidden;
+      animation: readmeSlideUp .25s ease;
+    }
+    @keyframes readmeSlideUp {
+      from { transform: translateY(12px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Modal Header */
+    .readme-modal-header {
+      display: flex;
+      align-items: center;
+      padding: 16px 24px;
+      border-bottom: 1px solid #e8e8e8;
+      background: #fafafa;
+      flex-shrink: 0;
+    }
+    .readme-modal-header .readme-modal-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #0078d4, #005a9e);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 14px;
+      flex-shrink: 0;
+    }
+    .readme-modal-header .readme-modal-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+    .readme-modal-header .readme-modal-title-group {
+      flex: 1;
+    }
+    .readme-modal-header .readme-modal-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #222;
+    }
+    .readme-modal-header .readme-modal-subtitle {
+      font-size: 12px;
+      color: #888;
+      margin-top: 1px;
+    }
+    .readme-modal-close {
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      font-size: 20px;
+      color: #888;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .15s;
+    }
+    .readme-modal-close:hover { background: #eee; color: #333; }
+
+    /* Info Banner */
+    .readme-info-banner {
+      padding: 12px 24px;
+      background: #f0f6ff;
+      border-bottom: 1px solid #d0e2f7;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .readme-info-banner .info-icon {
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #0078d4;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      margin-top: 1px;
+    }
+    .readme-info-banner p {
+      font-size: 13px;
+      color: #444;
+      line-height: 1.55;
+    }
+    .readme-info-banner p strong { color: #0078d4; }
+
+    /* Modal Body - Split Layout */
+    .readme-modal-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Editor Pane */
+    .readme-editor-pane {
+      flex: 3;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #e8e8e8;
+      min-width: 0;
+    }
+
+    /* Editor Tabs */
+    .readme-editor-tabs {
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      border-bottom: 1px solid #e8e8e8;
+      background: #fdfdfd;
+      flex-shrink: 0;
+    }
+    .readme-editor-tabs .tab {
+      padding: 10px 16px;
+      font-size: 13px;
+      color: #666;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all .15s;
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+      font-family: inherit;
+    }
+    .readme-editor-tabs .tab:hover { color: #333; }
+    .readme-editor-tabs .tab.active {
+      color: #0078d4;
+      border-bottom-color: #0078d4;
+      font-weight: 600;
+    }
+    .readme-editor-tabs .tab-spacer { flex: 1; }
+    .readme-editor-tabs .last-saved {
+      font-size: 11px;
+      color: #aaa;
+    }
+
+    /* Editor Toolbar */
+    .readme-toolbar {
+      display: flex;
+      align-items: center;
+      padding: 6px 12px;
+      gap: 2px;
+      border-bottom: 1px solid #eee;
+      background: #fafafa;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+    .readme-toolbar .tb-btn {
+      width: 32px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      color: #555;
+      transition: all .12s;
+      font-family: inherit;
+      position: relative;
+    }
+    .readme-toolbar .tb-btn:hover {
+      background: #e8e8e8;
+      color: #222;
+    }
+    .readme-toolbar .tb-btn:active { background: #ddd; }
+    .readme-toolbar .tb-btn.bold { font-weight: 800; }
+    .readme-toolbar .tb-btn.italic { font-style: italic; }
+    .readme-toolbar .tb-sep {
+      width: 1px;
+      height: 20px;
+      background: #ddd;
+      margin: 0 4px;
+    }
+    .readme-toolbar .tb-btn .tb-tip {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: #fff;
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .15s;
+      z-index: 10;
+      font-weight: 400;
+      font-style: normal;
+    }
+    .readme-toolbar .tb-btn:hover .tb-tip { opacity: 1; }
+
+    /* Textarea */
+    .readme-textarea-wrap {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+    .readme-textarea {
+      width: 100%;
+      height: 100%;
+      border: none;
+      outline: none;
+      resize: none;
+      padding: 20px 24px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 13.5px;
+      line-height: 1.7;
+      color: #333;
+      background: #fff;
+      tab-size: 2;
+    }
+    .readme-textarea::placeholder { color: #ccc; }
+
+    /* Preview Pane */
+    .readme-preview {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 32px;
+      display: none;
+      font-size: 14px;
+      line-height: 1.7;
+      color: #333;
+    }
+    .readme-preview.active { display: block; }
+    .readme-preview h1 { font-size: 28px; font-weight: 600; margin: 0 0 16px; padding-bottom: 8px; border-bottom: 1px solid #eee; }
+    .readme-preview h2 { font-size: 22px; font-weight: 600; margin: 28px 0 12px; padding-bottom: 6px; border-bottom: 1px solid #f0f0f0; }
+    .readme-preview h3 { font-size: 17px; font-weight: 600; margin: 24px 0 8px; }
+    .readme-preview p { margin: 0 0 12px; }
+    .readme-preview ul, .readme-preview ol { margin: 0 0 12px; padding-left: 24px; }
+    .readme-preview li { margin-bottom: 4px; }
+    .readme-preview code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Consolas', monospace;
+      font-size: 13px;
+    }
+    .readme-preview pre {
+      background: #f6f8fa;
+      border: 1px solid #e8e8e8;
+      border-radius: 6px;
+      padding: 16px;
+      overflow-x: auto;
+      margin: 0 0 16px;
+    }
+    .readme-preview pre code { background: none; padding: 0; }
+    .readme-preview blockquote {
+      border-left: 3px solid #0078d4;
+      margin: 0 0 12px;
+      padding: 8px 16px;
+      color: #555;
+      background: #f8fafd;
+      border-radius: 0 4px 4px 0;
+    }
+    .readme-preview hr { border: none; border-top: 1px solid #e0e0e0; margin: 20px 0; }
+    .readme-preview strong { font-weight: 600; }
+    .readme-preview em { font-style: italic; }
+    .readme-preview a { color: #0078d4; text-decoration: none; }
+    .readme-preview a:hover { text-decoration: underline; }
+
+    /* Chat Pane */
+    .readme-chat-pane {
+      flex: 2;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      background: #f9f9fb;
+    }
+    .readme-chat-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid #e8e8e8;
+      background: #fff;
+      flex-shrink: 0;
+    }
+    .readme-chat-header h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .readme-chat-header h4 .chat-ai-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #107c10;
+      display: inline-block;
+    }
+    .readme-chat-header p {
+      font-size: 12px;
+      color: #888;
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    /* Chat Messages */
+    .readme-chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .chat-msg {
+      max-width: 88%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.55;
+      word-wrap: break-word;
+    }
+    .chat-msg.ai {
+      background: #fff;
+      border: 1px solid #e4e4e4;
+      align-self: flex-start;
+      border-radius: 12px 12px 12px 4px;
+    }
+    .chat-msg.ai .chat-msg-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: #0078d4;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 4px;
+    }
+    .chat-msg.user {
+      background: #0078d4;
+      color: #fff;
+      align-self: flex-end;
+      border-radius: 12px 12px 4px 12px;
+    }
+    .chat-msg .chat-action {
+      display: inline-block;
+      margin-top: 6px;
+      padding: 4px 10px;
+      background: #f0f6ff;
+      border: 1px solid #cce0f5;
+      border-radius: 6px;
+      font-size: 11.5px;
+      color: #0078d4;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .chat-msg .chat-action:hover { background: #dceaf8; }
+
+    /* Chat typing indicator */
+    .chat-typing {
+      align-self: flex-start;
+      padding: 10px 16px;
+      background: #fff;
+      border: 1px solid #e4e4e4;
+      border-radius: 12px 12px 12px 4px;
+      display: none;
+    }
+    .chat-typing.active { display: flex; gap: 4px; align-items: center; }
+    .chat-typing .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #999;
+      animation: typingBounce .6s infinite alternate;
+    }
+    .chat-typing .dot:nth-child(2) { animation-delay: .15s; }
+    .chat-typing .dot:nth-child(3) { animation-delay: .3s; }
+    @keyframes typingBounce {
+      from { opacity: .3; transform: translateY(0); }
+      to { opacity: 1; transform: translateY(-3px); }
+    }
+
+    /* Chat Input */
+    .readme-chat-input-area {
+      padding: 12px 16px;
+      border-top: 1px solid #e8e8e8;
+      background: #fff;
+      flex-shrink: 0;
+    }
+    .readme-chat-input-wrap {
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+    }
+    .readme-chat-input {
+      flex: 1;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-family: inherit;
+      resize: none;
+      outline: none;
+      max-height: 80px;
+      line-height: 1.4;
+      transition: border-color .15s;
+    }
+    .readme-chat-input:focus { border-color: #0078d4; }
+    .readme-chat-input::placeholder { color: #bbb; }
+    .readme-chat-send {
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: #0078d4;
+      color: #fff;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .15s, transform .1s;
+      flex-shrink: 0;
+    }
+    .readme-chat-send:hover { background: #005a9e; }
+    .readme-chat-send:active { transform: scale(.93); }
+    .readme-chat-send svg { width: 16px; height: 16px; }
+
+    /* Modal Footer */
+    .readme-modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 12px 24px;
+      border-top: 1px solid #e8e8e8;
+      background: #fafafa;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .readme-modal-footer .footer-hint {
+      flex: 1;
+      font-size: 11.5px;
+      color: #aaa;
+    }
+    .readme-btn-cancel {
+      padding: 8px 20px;
+      border: 1px solid #ddd;
+      background: #fff;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background .15s;
+      font-family: inherit;
+    }
+    .readme-btn-cancel:hover { background: #f0f0f0; }
+    .readme-btn-save {
+      padding: 8px 24px;
+      border: none;
+      background: #0078d4;
+      color: #fff;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+      font-family: inherit;
+    }
+    .readme-btn-save:hover { background: #005a9e; }
+
+    /* ===== Page Toolbar ===== */
+    .page-toolbar {
+      display: flex;
+      align-items: center;
+      background: #fff;
+      padding: 8px 20px;
+      border-bottom: 1px solid #e1e1e1;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .page-toolbar .tool-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      font-size: 13px;
+      color: #333;
+      border: none;
+      background: transparent;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background .15s;
+      white-space: nowrap;
+    }
+    .page-toolbar .tool-btn:hover { background: #f0f0f0; }
+    .page-toolbar .tool-btn svg { width: 16px; height: 16px; fill: #333; }
+    .page-toolbar .separator { width: 1px; height: 24px; background: #ddd; margin: 0 4px; }
+    .page-toolbar .spacer { flex: 1; }
+    .page-toolbar .draft-info { font-size: 12px; color: #888; }
+    .page-toolbar .btn-share {
+      padding: 6px 14px;
+      font-size: 13px;
+      border: 1px solid #ddd;
+      background: #fff;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .page-toolbar .btn-share:hover { background: #f0f0f0; }
+    .page-toolbar .btn-edit {
+      padding: 6px 14px;
+      font-size: 13px;
+      border: 1px solid #ddd;
+      background: #fff;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .page-toolbar .btn-edit:hover { background: #f0f0f0; }
+    .page-toolbar .btn-republish {
+      padding: 6px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      background: #d83b01;
+      color: #fff;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .page-toolbar .btn-republish:hover { background: #c23400; }
+
+    /* ===== Left Sidebar ===== */
+    .layout {
+      display: flex;
+      min-height: calc(100vh - 180px);
+    }
+    .sidebar {
+      width: 48px;
+      background: #f5f5f5;
+      border-right: 1px solid #e1e1e1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 8px;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+    .sidebar .sb-btn {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background .15s;
+      color: #555;
+      font-size: 18px;
+      border: none;
+      background: transparent;
+      position: relative;
+    }
+    .sidebar .sb-btn:hover { background: #e1e1e1; }
+    .sidebar .sb-btn.active { background: #e1e1e1; color: #0078d4; }
+    .sidebar .sb-btn .tooltip {
+      display: none;
+      position: absolute;
+      left: 50px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #333;
+      color: #fff;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      white-space: nowrap;
+      z-index: 10;
+    }
+    .sidebar .sb-btn:hover .tooltip { display: block; }
+
+    /* ===== Main Content ===== */
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    /* ===== Hero Banner ===== */
+    .hero {
+      position: relative;
+      width: 100%;
+      height: 480px;
+      overflow: hidden;
+      cursor: default;
+    }
+    .hero .hero-bg {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .hero .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,.15) 0%, rgba(0,0,0,.45) 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .hero h1 {
+      font-size: 48px;
+      font-weight: 300;
+      color: #fff;
+      margin-bottom: 20px;
+      text-shadow: 0 2px 8px rgba(0,0,0,.3);
+      font-style: italic;
+      font-family: Georgia, 'Times New Roman', serif;
+    }
+    .hero .hero-desc {
+      max-width: 620px;
+      font-size: 14px;
+      color: #fff;
+      line-height: 1.6;
+      margin-bottom: 28px;
+      text-shadow: 0 1px 4px rgba(0,0,0,.4);
+    }
+    .hero .cta-btn {
+      display: inline-block;
+      padding: 12px 28px;
+      background: #d83b01;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      transition: background .2s, transform .15s;
+    }
+    .hero .cta-btn:hover { background: #c23400; transform: translateY(-1px); }
+    .hero .cta-btn:active { transform: translateY(0); }
+
+    /* ===== Quick Links Section ===== */
+    .quick-links {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      padding: 32px 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .quick-link-card {
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.1);
+      padding: 24px;
+      cursor: pointer;
+      transition: box-shadow .2s, transform .15s;
+    }
+    .quick-link-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,.15);
+      transform: translateY(-2px);
+    }
+    .quick-link-card .card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-bottom: 14px;
+      color: #fff;
+    }
+    .quick-link-card h3 { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 8px; }
+    .quick-link-card p { font-size: 13px; color: #666; line-height: 1.5; }
+
+    /* ===== News Section ===== */
+    .news-section {
+      padding: 32px 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .news-section h2 {
+      font-size: 22px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 20px;
+    }
+    .news-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .news-card {
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.1);
+      overflow: hidden;
+      cursor: pointer;
+      transition: box-shadow .2s, transform .15s;
+    }
+    .news-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,.15);
+      transform: translateY(-2px);
+    }
+    .news-card .news-img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      display: block;
+    }
+    .news-card .news-img-placeholder {
+      width: 100%;
+      height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+    }
+    .news-card .news-body { padding: 16px; }
+    .news-card .news-body h4 { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 8px; }
+    .news-card .news-body p { font-size: 13px; color: #666; line-height: 1.5; }
+    .news-card .news-body .news-date { font-size: 12px; color: #999; margin-top: 10px; }
+
+    /* ===== Search Modal ===== */
+    .search-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.4);
+      z-index: 200;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 80px;
+    }
+    .search-modal-overlay.active { display: flex; }
+    .search-modal {
+      background: #fff;
+      width: 600px;
+      max-width: 90%;
+      border-radius: 8px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.2);
+      overflow: hidden;
+    }
+    .search-modal input {
+      width: 100%;
+      border: none;
+      padding: 16px 20px;
+      font-size: 16px;
+      outline: none;
+    }
+    .search-modal .search-results {
+      border-top: 1px solid #eee;
+      padding: 12px 0;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .search-modal .search-result-item {
+      padding: 10px 20px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #333;
+      transition: background .1s;
+    }
+    .search-modal .search-result-item:hover { background: #f5f5f5; }
+    .search-modal .search-hint { padding: 10px 20px; font-size: 13px; color: #999; }
+
+    /* ===== Notification Panel ===== */
+    .notification-panel {
+      display: none;
+      position: fixed;
+      right: 0;
+      top: 48px;
+      width: 360px;
+      height: calc(100vh - 48px);
+      background: #fff;
+      box-shadow: -4px 0 16px rgba(0,0,0,.1);
+      z-index: 150;
+      overflow-y: auto;
+    }
+    .notification-panel.active { display: block; }
+    .notification-panel .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid #eee;
+    }
+    .notification-panel .panel-header h3 { font-size: 16px; font-weight: 600; }
+    .notification-panel .panel-header .close-btn {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #666;
+      padding: 4px 8px;
+    }
+    .notification-panel .notif-item {
+      padding: 14px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .notification-panel .notif-item:hover { background: #f8f8f8; }
+    .notification-panel .notif-item .notif-title { font-size: 14px; font-weight: 600; color: #333; }
+    .notification-panel .notif-item .notif-desc { font-size: 13px; color: #666; margin-top: 4px; }
+    .notification-panel .notif-item .notif-time { font-size: 12px; color: #999; margin-top: 6px; }
+
+    /* ===== Dropdown Menus ===== */
+    .nav-dropdown {
+      position: relative;
+    }
+    .nav-dropdown .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: #fff;
+      box-shadow: 0 4px 16px rgba(0,0,0,.15);
+      border-radius: 4px;
+      min-width: 180px;
+      z-index: 50;
+      padding: 4px 0;
+    }
+    .nav-dropdown:hover .dropdown-menu { display: block; }
+    .nav-dropdown .dropdown-menu a {
+      display: block;
+      padding: 8px 16px;
+      font-size: 13px;
+      color: #333;
+      text-decoration: none;
+      border-bottom: none;
+      height: auto;
+    }
+    .nav-dropdown .dropdown-menu a:hover { background: #f0f0f0; color: #0078d4; }
+
+    /* ===== Footer ===== */
+    .footer {
+      background: #fff;
+      border-top: 1px solid #e1e1e1;
+      padding: 20px 40px;
+      text-align: center;
+      color: #999;
+      font-size: 12px;
+      margin-top: 40px;
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 768px) {
+      .hero { height: 320px; }
+      .hero h1 { font-size: 32px; }
+      .site-header .site-meta { display: none; }
+      .page-toolbar { display: none; }
+      .sidebar { display: none; }
+      .quick-links { padding: 20px; }
+      .news-section { padding: 20px; }
+      .readme-modal-body { flex-direction: column; }
+      .readme-editor-pane { border-right: none; border-bottom: 1px solid #e8e8e8; }
+      .readme-chat-pane { min-height: 250px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <header class="top-bar">
+    <div class="app-launcher" title="App launcher">&#9783;</div>
+    <div class="brand">SharePoint</div>
+    <div class="search-box">
+      <span class="search-icon">&#128269;</span>
+      <input type="text" placeholder="Search across sites" id="searchInput">
+    </div>
+    <div class="top-actions">
+      <button class="icon-btn" title="Notifications" id="notifBtn">&#128276;</button>
+      <button class="icon-btn" title="Settings">&#9881;</button>
+      <button class="icon-btn" title="Help">&#63;</button>
+      <div class="avatar" title="Profile">AH</div>
+    </div>
+  </header>
+
+  <!-- Site Navigation -->
+  <nav class="site-nav">
+    <a href="#">News</a>
+    <div class="nav-dropdown">
+      <a href="#" class="has-dropdown">Who we are</a>
+      <div class="dropdown-menu">
+        <a href="#">Our Mission</a>
+        <a href="#">Leadership</a>
+        <a href="#">Organization</a>
+      </div>
+    </div>
+    <div class="nav-dropdown">
+      <a href="#" class="has-dropdown">Rhythm of the Business</a>
+      <div class="dropdown-menu">
+        <a href="#">Quarterly Reviews</a>
+        <a href="#">Planning Cycles</a>
+        <a href="#">Key Dates</a>
+      </div>
+    </div>
+    <div class="nav-dropdown">
+      <a href="#" class="has-dropdown">Teams</a>
+      <div class="dropdown-menu">
+        <a href="#">Engineering</a>
+        <a href="#">Product</a>
+        <a href="#">Design</a>
+        <a href="#">Operations</a>
+      </div>
+    </div>
+    <a href="#">Craft</a>
+    <div class="nav-dropdown">
+      <a href="#" class="has-dropdown">Events</a>
+      <div class="dropdown-menu">
+        <a href="#">Upcoming Events</a>
+        <a href="#">Past Events</a>
+        <a href="#">Recordings</a>
+      </div>
+    </div>
+    <a href="#">ODSP team site</a>
+    <a href="#">CAP site</a>
+    <a href="#">ExOweb</a>
+    <a href="#">EAP</a>
+  </nav>
+
+  <!-- Site Header -->
+  <div class="site-header">
+    <div class="site-logo">O D<br>S P</div>
+    <div class="site-title">OneDrive &amp; SharePoint</div>
+
+    <!-- README Badge -->
+    <button class="readme-badge" id="readmeBadge">
+      <span class="readme-icon">
+        <svg viewBox="0 0 16 16" fill="currentColor">
+          <path d="M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 9 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"/>
+          <path d="M5.5 8.75a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 0 1.5h-3.5a.75.75 0 0 1-.75-.75Zm.75 2.25a.75.75 0 0 0 0 1.5h2a.75.75 0 0 0 0-1.5h-2Z"/>
+        </svg>
+      </span>
+      README.md
+      <span class="readme-tip">
+        <strong>Site README</strong>
+        Discover this site's purpose, content norms, and standards &mdash; for people and AI agents alike.
+      </span>
+    </button>
+
+    <div class="site-meta">
+      <span>Confidential | Internal only</span>
+      <a href="#">+ Create site</a>
+      <a href="#">&#9734; Following</a>
+      <a href="#">Site access</a>
+      <a href="#">English &#9662;</a>
+    </div>
+  </div>
+
+  <!-- Page Toolbar -->
+  <div class="page-toolbar">
+    <button class="tool-btn">&#43; New</button>
+    <div class="separator"></div>
+    <button class="tool-btn">&#127760; Translation</button>
+    <button class="tool-btn">&#128196; Page details</button>
+    <button class="tool-btn">&#128065; Preview</button>
+    <button class="tool-btn">&#128214; Immersive reader</button>
+    <button class="tool-btn">&#128200; Analytics</button>
+    <div class="spacer"></div>
+    <span class="draft-info">Draft saved 2/11/2026</span>
+    <button class="btn-share">&#128279; Share</button>
+    <button class="btn-edit">&#9998; Edit</button>
+    <button class="btn-republish">Republish</button>
+  </div>
+
+  <!-- Layout with Sidebar -->
+  <div class="layout">
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+      <button class="sb-btn active">
+        &#127968;
+        <span class="tooltip">Home</span>
+      </button>
+      <button class="sb-btn">
+        &#128172;
+        <span class="tooltip">Conversations</span>
+      </button>
+      <button class="sb-btn">
+        &#128196;
+        <span class="tooltip">Documents</span>
+      </button>
+      <button class="sb-btn">
+        &#128247;
+        <span class="tooltip">Photos</span>
+      </button>
+      <button class="sb-btn">
+        &#128193;
+        <span class="tooltip">OneDrive</span>
+      </button>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Hero Banner -->
+      <section class="hero" id="hero">
+        <img
+          src="https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=1400&q=80"
+          alt="Mountain road landscape"
+          class="hero-bg"
+          onerror="this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg, #1a5276, #2e86c1, #5dade2)';"
+        >
+        <div class="hero-overlay">
+          <h1>ODSP FY26 Vision Day</h1>
+          <p class="hero-desc">
+            Our FY26 Vision Day featured our annual goals, celebrated our achievements, showcased
+            our innovation and commitment to fundamental principles, and shared the global priorities
+            for ODSP.
+          </p>
+          <a href="#" class="cta-btn" id="ctaBtn">View the videos and deck</a>
+        </div>
+      </section>
+
+      <!-- Quick Links -->
+      <section class="quick-links">
+        <div class="quick-link-card" onclick="showToast('Opening New Employee Hub...')">
+          <div class="card-icon" style="background:#0078d4;">&#128101;</div>
+          <h3>New Employee Hub</h3>
+          <p>Everything you need to get started on the ODSP team.</p>
+        </div>
+        <div class="quick-link-card" onclick="showToast('Opening Engineering Resources...')">
+          <div class="card-icon" style="background:#107c10;">&#128736;</div>
+          <h3>Engineering Resources</h3>
+          <p>Tools, documentation, and resources for engineering teams.</p>
+        </div>
+        <div class="quick-link-card" onclick="showToast('Opening Team Events...')">
+          <div class="card-icon" style="background:#d83b01;">&#128197;</div>
+          <h3>Team Events</h3>
+          <p>Upcoming events, morale activities, and team gatherings.</p>
+        </div>
+        <div class="quick-link-card" onclick="showToast('Opening OKRs & Goals...')">
+          <div class="card-icon" style="background:#5c2d91;">&#127919;</div>
+          <h3>OKRs &amp; Goals</h3>
+          <p>Track quarterly objectives and key results for the org.</p>
+        </div>
+      </section>
+
+      <!-- News Section -->
+      <section class="news-section">
+        <h2>News</h2>
+        <div class="news-grid">
+          <div class="news-card" onclick="showToast('Opening article...')">
+            <div class="news-img-placeholder" style="background: linear-gradient(135deg, #667eea, #764ba2);">&#128640;</div>
+            <div class="news-body">
+              <h4>FY26 H1 Priorities Announced</h4>
+              <p>Check out the updated priorities and focus areas for the first half of fiscal year 2026.</p>
+              <div class="news-date">February 10, 2026</div>
+            </div>
+          </div>
+          <div class="news-card" onclick="showToast('Opening article...')">
+            <div class="news-img-placeholder" style="background: linear-gradient(135deg, #f093fb, #f5576c);">&#127881;</div>
+            <div class="news-body">
+              <h4>ODSP Wins Customer Satisfaction Award</h4>
+              <p>Our team was recognized for outstanding customer satisfaction scores this quarter.</p>
+              <div class="news-date">February 5, 2026</div>
+            </div>
+          </div>
+          <div class="news-card" onclick="showToast('Opening article...')">
+            <div class="news-img-placeholder" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">&#128187;</div>
+            <div class="news-body">
+              <h4>New Developer Tools Available</h4>
+              <p>Streamlined tooling and updated SDKs are now available for all engineering teams.</p>
+              <div class="news-date">January 28, 2026</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <div class="footer">
+        &copy; 2026 OneDrive &amp; SharePoint &mdash; Internal Use Only
+      </div>
+    </main>
+  </div>
+
+  <!-- README Overlay -->
+  <div class="readme-overlay" id="readmeOverlay">
+    <div class="readme-modal">
+
+      <!-- Modal Header -->
+      <div class="readme-modal-header">
+        <div class="readme-modal-icon">
+          <svg viewBox="0 0 16 16" fill="#fff">
+            <path d="M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 9 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"/>
+            <path d="M5.5 8.75a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 0 1.5h-3.5a.75.75 0 0 1-.75-.75Zm.75 2.25a.75.75 0 0 0 0 1.5h2a.75.75 0 0 0 0-1.5h-2Z"/>
+          </svg>
+        </div>
+        <div class="readme-modal-title-group">
+          <div class="readme-modal-title">README.md</div>
+          <div class="readme-modal-subtitle">OneDrive &amp; SharePoint &mdash; Site Configuration</div>
+        </div>
+        <button class="readme-modal-close" id="readmeClose">&times;</button>
+      </div>
+
+      <!-- Info Banner -->
+      <div class="readme-info-banner">
+        <div class="info-icon">i</div>
+        <p>
+          This file is <strong>read by AI agents and copilots</strong> to understand this site's purpose,
+          content standards, and community norms. It also helps new team members quickly orient themselves.
+          Keep it concise and up to date &mdash; think of it as the site's source of truth for
+          <strong>what belongs here</strong>, <strong>how content should be written</strong>,
+          and <strong>what conventions to follow</strong>.
+        </p>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="readme-modal-body">
+
+        <!-- Editor Pane -->
+        <div class="readme-editor-pane">
+          <!-- Tabs -->
+          <div class="readme-editor-tabs">
+            <button class="tab active" id="tabEdit">Edit</button>
+            <button class="tab" id="tabPreview">Preview</button>
+            <span class="tab-spacer"></span>
+            <span class="last-saved" id="lastSaved">Last saved just now</span>
+          </div>
+
+          <!-- Toolbar -->
+          <div class="readme-toolbar" id="readmeToolbar">
+            <button class="tb-btn bold" data-action="bold">B<span class="tb-tip">Bold (Ctrl+B)</span></button>
+            <button class="tb-btn italic" data-action="italic">I<span class="tb-tip">Italic (Ctrl+I)</span></button>
+            <div class="tb-sep"></div>
+            <button class="tb-btn" data-action="h1" style="font-size:15px;font-weight:700;">H1<span class="tb-tip">Heading 1</span></button>
+            <button class="tb-btn" data-action="h2" style="font-size:13px;font-weight:700;">H2<span class="tb-tip">Heading 2</span></button>
+            <button class="tb-btn" data-action="h3" style="font-size:11px;font-weight:700;">H3<span class="tb-tip">Heading 3</span></button>
+            <div class="tb-sep"></div>
+            <button class="tb-btn" data-action="ul">&#8226; List<span class="tb-tip">Bullet list</span></button>
+            <button class="tb-btn" data-action="ol">1. List<span class="tb-tip">Numbered list</span></button>
+            <div class="tb-sep"></div>
+            <button class="tb-btn" data-action="code" style="font-family:Consolas,monospace;">&lt;/&gt;<span class="tb-tip">Code</span></button>
+            <button class="tb-btn" data-action="link">&#128279;<span class="tb-tip">Link</span></button>
+            <button class="tb-btn" data-action="quote">&#8220;<span class="tb-tip">Blockquote</span></button>
+            <button class="tb-btn" data-action="hr">&mdash;<span class="tb-tip">Horizontal rule</span></button>
+          </div>
+
+          <!-- Textarea -->
+          <div class="readme-textarea-wrap" id="editorWrap">
+            <textarea class="readme-textarea" id="readmeTextarea" placeholder="Start writing your site README..." spellcheck="true"></textarea>
+          </div>
+
+          <!-- Preview -->
+          <div class="readme-preview" id="readmePreview"></div>
+        </div>
+
+        <!-- Chat Pane -->
+        <div class="readme-chat-pane">
+          <div class="readme-chat-header">
+            <h4><span class="chat-ai-dot"></span> AI Assistant</h4>
+            <p>Ask me to help draft, refine, or restructure your README. I can add sections, improve wording, or suggest what to include.</p>
+          </div>
+
+          <div class="readme-chat-messages" id="chatMessages">
+            <div class="chat-msg ai">
+              <div class="chat-msg-label">AI Assistant</div>
+              I see your site README has a starter template. I can help you flesh it out! Try asking me things like:
+              <br><br>
+              <em>"Add a section about our content approval process"</em><br>
+              <em>"What other sections should I add?"</em><br>
+              <em>"Rewrite the purpose section to be more specific"</em><br>
+              <em>"Add guidelines about image usage"</em>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chatTyping">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+          </div>
+
+          <div class="readme-chat-input-area">
+            <div class="readme-chat-input-wrap">
+              <textarea class="readme-chat-input" id="chatInput" placeholder="Ask AI to update the README..." rows="1"></textarea>
+              <button class="readme-chat-send" id="chatSend">
+                <svg viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M1.724 1.053a.5.5 0 0 1 .54-.068l12 6a.5.5 0 0 1 0 .894l-12 6A.5.5 0 0 1 1.5 13.5v-4.379l6.879-1.121L1.5 6.879V2.5a.5.5 0 0 1 .224-.447Z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="readme-modal-footer">
+        <span class="footer-hint">Changes are saved locally in your browser</span>
+        <button class="readme-btn-cancel" id="readmeBtnCancel">Cancel</button>
+        <button class="readme-btn-save" id="readmeBtnSave">Save README</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search Modal -->
+  <div class="search-modal-overlay" id="searchModal">
+    <div class="search-modal">
+      <input type="text" placeholder="Search across sites..." id="modalSearchInput" autofocus>
+      <div class="search-results" id="searchResults">
+        <div class="search-hint">Try searching for "Vision Day", "Teams", or "Events"</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Panel -->
+  <div class="notification-panel" id="notifPanel">
+    <div class="panel-header">
+      <h3>Notifications</h3>
+      <button class="close-btn" id="closeNotifBtn">&times;</button>
+    </div>
+    <div class="notif-item">
+      <div class="notif-title">Page published successfully</div>
+      <div class="notif-desc">The ODSP FY26 Vision Day page has been published.</div>
+      <div class="notif-time">2 hours ago</div>
+    </div>
+    <div class="notif-item">
+      <div class="notif-title">New comment on Engineering Resources</div>
+      <div class="notif-desc">John added a comment: "Updated the SDK links."</div>
+      <div class="notif-time">5 hours ago</div>
+    </div>
+    <div class="notif-item">
+      <div class="notif-title">Team event reminder</div>
+      <div class="notif-desc">ODSP All Hands meeting tomorrow at 10:00 AM PST.</div>
+      <div class="notif-time">1 day ago</div>
+    </div>
+    <div class="notif-item">
+      <div class="notif-title">Document shared with you</div>
+      <div class="notif-desc">Sarah shared "FY26 Planning Doc" with you.</div>
+      <div class="notif-time">2 days ago</div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" style="
+    display: none;
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    z-index: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,.2);
+    transition: opacity .3s;
+  "></div>
+
+  <script>
+    // ===== Default README content =====
+    const defaultReadme = `# OneDrive & SharePoint \u2014 Site README
+
+> **For AI agents and copilots:** This document defines the purpose, structure,
+> and content standards for the ODSP SharePoint site. Use it to understand what
+> content belongs here, how it should be formatted, and what norms to follow
+> when creating or modifying pages.
+
+## Purpose
+
+This site is the central hub for the OneDrive & SharePoint (ODSP) organization.
+It serves as the primary internal communication channel for:
+
+- Organization-wide announcements and news
+- Strategic priorities, OKRs, and vision updates
+- Team directory and organizational structure
+- Engineering resources and technical documentation
+- Event listings and recordings
+
+## Audience
+
+- ODSP full-time employees and vendors
+- Cross-team partners who collaborate with ODSP
+- New hires during onboarding
+
+## Content Standards
+
+### Tone & Voice
+- Write in a professional but approachable tone
+- Use plain language; avoid unnecessary jargon
+- Be concise \u2014 respect the reader\u2019s time
+
+### Formatting Norms
+- Use H2 headings for major sections, H3 for subsections
+- Include a clear summary or description at the top of every page
+- Use bullet points for lists of 3+ items
+- Add dates to time-sensitive content (announcements, events)
+
+### Media & Images
+- Hero images should be high-resolution (minimum 1400px wide)
+- Use approved brand imagery; avoid stock photos that feel generic
+- Alt text is required on all images
+
+## Content Ownership
+
+| Section | Owner | Update Cadence |
+|---------|-------|---------------|
+| News & Announcements | Comms team | Weekly |
+| Engineering Resources | Engineering leads | As needed |
+| Team Events | Culture committee | Bi-weekly |
+| OKRs & Goals | Leadership | Quarterly |
+
+## Governance
+
+- All new top-level pages require approval from the site admin
+- Outdated content (>6 months without update) should be archived or refreshed
+- The README itself should be reviewed quarterly
+`;
+
+    // ===== README Editor State =====
+    const readmeOverlay = document.getElementById('readmeOverlay');
+    const readmeBadge = document.getElementById('readmeBadge');
+    const readmeClose = document.getElementById('readmeClose');
+    const readmeTextarea = document.getElementById('readmeTextarea');
+    const readmePreview = document.getElementById('readmePreview');
+    const editorWrap = document.getElementById('editorWrap');
+    const readmeToolbar = document.getElementById('readmeToolbar');
+    const tabEdit = document.getElementById('tabEdit');
+    const tabPreview = document.getElementById('tabPreview');
+    const lastSaved = document.getElementById('lastSaved');
+    const btnCancel = document.getElementById('readmeBtnCancel');
+    const btnSave = document.getElementById('readmeBtnSave');
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const chatSend = document.getElementById('chatSend');
+    const chatTyping = document.getElementById('chatTyping');
+
+    // Load from localStorage or use default
+    let savedReadme = localStorage.getItem('site-readme');
+    readmeTextarea.value = savedReadme || defaultReadme;
+
+    // Open/close overlay
+    readmeBadge.addEventListener('click', () => {
+      readmeOverlay.classList.add('active');
+      readmeTextarea.focus();
+    });
+
+    function closeReadmeOverlay() {
+      readmeOverlay.classList.remove('active');
+    }
+    readmeClose.addEventListener('click', closeReadmeOverlay);
+    btnCancel.addEventListener('click', closeReadmeOverlay);
+    readmeOverlay.addEventListener('click', (e) => {
+      if (e.target === readmeOverlay) closeReadmeOverlay();
+    });
+
+    // Save
+    btnSave.addEventListener('click', () => {
+      localStorage.setItem('site-readme', readmeTextarea.value);
+      lastSaved.textContent = 'Last saved just now';
+      showToast('README saved successfully!');
+    });
+
+    // Tab switching
+    tabEdit.addEventListener('click', () => {
+      tabEdit.classList.add('active');
+      tabPreview.classList.remove('active');
+      editorWrap.style.display = 'block';
+      readmeToolbar.style.display = 'flex';
+      readmePreview.classList.remove('active');
+    });
+    tabPreview.addEventListener('click', () => {
+      tabPreview.classList.add('active');
+      tabEdit.classList.remove('active');
+      editorWrap.style.display = 'none';
+      readmeToolbar.style.display = 'none';
+      readmePreview.classList.add('active');
+      readmePreview.innerHTML = renderMarkdown(readmeTextarea.value);
+    });
+
+    // ===== Markdown Toolbar Actions =====
+    document.querySelectorAll('.readme-toolbar .tb-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const action = btn.dataset.action;
+        const ta = readmeTextarea;
+        const start = ta.selectionStart;
+        const end = ta.selectionEnd;
+        const selected = ta.value.substring(start, end);
+        let insert = '';
+        let cursorOffset = 0;
+
+        switch (action) {
+          case 'bold':
+            insert = `**${selected || 'bold text'}**`;
+            cursorOffset = selected ? insert.length : 2;
+            break;
+          case 'italic':
+            insert = `*${selected || 'italic text'}*`;
+            cursorOffset = selected ? insert.length : 1;
+            break;
+          case 'h1':
+            insert = `\n# ${selected || 'Heading 1'}\n`;
+            cursorOffset = insert.length;
+            break;
+          case 'h2':
+            insert = `\n## ${selected || 'Heading 2'}\n`;
+            cursorOffset = insert.length;
+            break;
+          case 'h3':
+            insert = `\n### ${selected || 'Heading 3'}\n`;
+            cursorOffset = insert.length;
+            break;
+          case 'ul':
+            insert = selected
+              ? selected.split('\n').map(l => `- ${l}`).join('\n')
+              : `\n- Item 1\n- Item 2\n- Item 3\n`;
+            cursorOffset = insert.length;
+            break;
+          case 'ol':
+            insert = selected
+              ? selected.split('\n').map((l, i) => `${i + 1}. ${l}`).join('\n')
+              : `\n1. First item\n2. Second item\n3. Third item\n`;
+            cursorOffset = insert.length;
+            break;
+          case 'code':
+            if (selected && selected.includes('\n')) {
+              insert = `\n\`\`\`\n${selected}\n\`\`\`\n`;
+            } else {
+              insert = `\`${selected || 'code'}\``;
+            }
+            cursorOffset = insert.length;
+            break;
+          case 'link':
+            insert = `[${selected || 'link text'}](url)`;
+            cursorOffset = selected ? insert.length - 1 : 1;
+            break;
+          case 'quote':
+            insert = selected
+              ? selected.split('\n').map(l => `> ${l}`).join('\n')
+              : `\n> ${selected || 'Quote text'}\n`;
+            cursorOffset = insert.length;
+            break;
+          case 'hr':
+            insert = '\n\n---\n\n';
+            cursorOffset = insert.length;
+            break;
+        }
+
+        ta.setRangeText(insert, start, end, 'end');
+        ta.focus();
+      });
+    });
+
+    // Keyboard shortcuts in editor
+    readmeTextarea.addEventListener('keydown', (e) => {
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'b') {
+          e.preventDefault();
+          document.querySelector('[data-action="bold"]').click();
+        } else if (e.key === 'i') {
+          e.preventDefault();
+          document.querySelector('[data-action="italic"]').click();
+        } else if (e.key === 's') {
+          e.preventDefault();
+          btnSave.click();
+        }
+      }
+      // Tab key inserts spaces
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const start = readmeTextarea.selectionStart;
+        readmeTextarea.setRangeText('  ', start, readmeTextarea.selectionEnd, 'end');
+      }
+    });
+
+    // ===== Simple Markdown Renderer =====
+    function renderMarkdown(md) {
+      let html = md;
+
+      // Code blocks (must come before inline processing)
+      html = html.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+
+      // Headings
+      html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+      html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+      html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+
+      // Horizontal rule
+      html = html.replace(/^---$/gm, '<hr>');
+
+      // Blockquotes
+      html = html.replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>');
+      // Merge consecutive blockquotes
+      html = html.replace(/<\/blockquote>\n<blockquote>/g, '<br>');
+
+      // Bold & italic
+      html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+
+      // Inline code
+      html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+      // Links
+      html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+
+      // Tables (basic)
+      html = html.replace(/^\|(.+)\|$/gm, (match, content) => {
+        if (content.match(/^[\s\-|]+$/)) return ''; // separator row
+        const cells = content.split('|').map(c => c.trim());
+        return '<tr>' + cells.map(c => `<td style="padding:6px 12px;border:1px solid #e0e0e0;">${c}</td>`).join('') + '</tr>';
+      });
+      html = html.replace(/(<tr>[\s\S]*?<\/tr>)/g, (match) => {
+        if (!match.startsWith('<table>')) return '<table style="border-collapse:collapse;margin:12px 0;">' + match + '</table>';
+        return match;
+      });
+
+      // Unordered lists
+      html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+      html = html.replace(/(<li>[\s\S]*?<\/li>)/g, (match) => {
+        return '<ul>' + match + '</ul>';
+      });
+      // Clean nested ul tags
+      html = html.replace(/<\/ul>\n?<ul>/g, '');
+
+      // Paragraphs - wrap remaining lines
+      html = html.split('\n\n').map(block => {
+        block = block.trim();
+        if (!block) return '';
+        if (block.match(/^<(h[1-3]|ul|ol|li|pre|blockquote|hr|table|tr|td)/)) return block;
+        return `<p>${block.replace(/\n/g, '<br>')}</p>`;
+      }).join('\n');
+
+      return html;
+    }
+
+    // ===== Chat System =====
+    function addChatMessage(text, role, withAction) {
+      const msg = document.createElement('div');
+      msg.className = `chat-msg ${role}`;
+      if (role === 'ai') {
+        msg.innerHTML = `<div class="chat-msg-label">AI Assistant</div>${text}`;
+        if (withAction) {
+          const actionBtn = document.createElement('span');
+          actionBtn.className = 'chat-action';
+          actionBtn.textContent = 'Apply to README';
+          actionBtn.addEventListener('click', () => {
+            readmeTextarea.value = withAction;
+            actionBtn.textContent = 'Applied!';
+            actionBtn.style.background = '#e6f4ea';
+            actionBtn.style.borderColor = '#a8dab5';
+            actionBtn.style.color = '#107c10';
+            showToast('Changes applied to the editor');
+          });
+          msg.appendChild(actionBtn);
+        }
+      } else {
+        msg.textContent = text;
+      }
+      chatMessages.appendChild(msg);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function showTyping() {
+      chatTyping.classList.add('active');
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    function hideTyping() {
+      chatTyping.classList.remove('active');
+    }
+
+    function handleChat(userMsg) {
+      addChatMessage(userMsg, 'user');
+      showTyping();
+
+      const lower = userMsg.toLowerCase();
+      let delay = 800 + Math.random() * 600;
+
+      setTimeout(() => {
+        hideTyping();
+        const currentContent = readmeTextarea.value;
+
+        // Pattern: asking what to add / suggestions
+        if (lower.match(/what.*(should|could|else|more|missing|suggest|recommend|include)/)) {
+          const suggestions = [];
+          if (!currentContent.includes('## Accessibility')) suggestions.push('**Accessibility standards** \u2014 guidelines for accessible content');
+          if (!currentContent.includes('## Contact')) suggestions.push('**Contact & Support** \u2014 who to reach out to for help');
+          if (!currentContent.includes('## Permissions')) suggestions.push('**Permissions model** \u2014 who can edit what');
+          if (!currentContent.includes('## Archive')) suggestions.push('**Archival policy** \u2014 when and how content gets archived');
+          if (!currentContent.includes('## Templates')) suggestions.push('**Page templates** \u2014 standard templates for common page types');
+          if (!currentContent.includes('## SEO') && !currentContent.includes('## Search')) suggestions.push('**Search optimization** \u2014 tagging and metadata conventions');
+
+          if (suggestions.length === 0) {
+            addChatMessage("Your README is looking pretty comprehensive! You might consider adding examples or links to template pages to make it even more actionable.", 'ai');
+          } else {
+            addChatMessage(`Here are some sections you could add:<br><br>${suggestions.map(s => `\u2022 ${s}`).join('<br>')}  <br><br>Which would you like me to draft?`, 'ai');
+          }
+        }
+        // Pattern: add accessibility section
+        else if (lower.match(/accessib/)) {
+          const newSection = `\n\n## Accessibility\n\n- All pages must meet WCAG 2.1 AA standards\n- Use sufficient color contrast (minimum 4.5:1 ratio for text)\n- Provide alt text for every image and graphic\n- Ensure all interactive elements are keyboard-navigable\n- Use semantic headings in the correct hierarchy (don't skip levels)\n- Test pages with a screen reader before publishing\n`;
+          addChatMessage(
+            "I've drafted an Accessibility section with key standards including WCAG 2.1, color contrast requirements, alt text, keyboard navigation, semantic headings, and screen reader testing.",
+            'ai',
+            currentContent + newSection
+          );
+        }
+        // Pattern: add contact section
+        else if (lower.match(/contact|support|help|who.*reach|who.*ask/)) {
+          const newSection = `\n\n## Contact & Support\n\n- **Site admin:** ODSP Comms Team (odsp-comms@microsoft.com)\n- **Technical issues:** File a ticket via ServiceNow\n- **Content questions:** Reach out in the #odsp-sharepoint Teams channel\n- **README updates:** Submit a suggestion to the site admin\n`;
+          addChatMessage(
+            "I've drafted a Contact & Support section with roles for site admin, technical issues, content questions, and README updates.",
+            'ai',
+            currentContent + newSection
+          );
+        }
+        // Pattern: add permissions section
+        else if (lower.match(/permission|access|who.*edit|who.*can/)) {
+          const newSection = `\n\n## Permissions & Access\n\n| Role | Access Level | Who |\n|------|-------------|-----|\n| Site Owner | Full control | ODSP Leadership |\n| Content Editor | Edit pages & upload files | Comms team, designated editors |\n| Contributor | Submit drafts for review | All ODSP FTEs |\n| Viewer | Read-only | Cross-org partners |\n\n- New editor access requires manager approval\n- Vendor accounts have read-only access by default\n`;
+          addChatMessage(
+            "I've drafted a Permissions & Access section with a role table covering Site Owner, Content Editor, Contributor, and Viewer levels.",
+            'ai',
+            currentContent + newSection
+          );
+        }
+        // Pattern: add templates section
+        else if (lower.match(/template/)) {
+          const newSection = `\n\n## Page Templates\n\nUse these standard templates for consistency:\n\n- **Announcement page** \u2014 Hero image + summary + details + contact\n- **Team page** \u2014 Mission statement + members + links to resources\n- **Event page** \u2014 Date/time + location + agenda + registration link\n- **Resource page** \u2014 Description + categorized link list + owner info\n\nTemplates are available in the site\u2019s Page Templates library. Always start from a template rather than a blank page.\n`;
+          addChatMessage(
+            "I've drafted a Page Templates section with four standard templates: Announcement, Team, Event, and Resource pages.",
+            'ai',
+            currentContent + newSection
+          );
+        }
+        // Pattern: rewrite / improve purpose
+        else if (lower.match(/rewrit|improv|specific|purpose|better|refine/)) {
+          const improved = currentContent.replace(
+            /## Purpose\n\n[\s\S]*?(?=\n## )/,
+            `## Purpose\n\nThe ODSP SharePoint site is the **single source of truth** for organization-wide communication within the OneDrive & SharePoint group. It exists to:\n\n1. **Align the org** around strategic priorities, OKRs, and quarterly goals\n2. **Accelerate onboarding** by centralizing essential resources for new hires\n3. **Foster community** through event listings, team spotlights, and culture content\n4. **Enable self-service** so team members can find answers without asking around\n\nThis is *not* a place for working documents, personal notes, or project-specific wikis. Those belong in team-level sites or OneDrive.\n\n`
+          );
+          addChatMessage(
+            "I've rewritten the Purpose section to be more specific and action-oriented. It now clearly states the four key objectives and includes a note about what <em>doesn't</em> belong on this site.",
+            'ai',
+            improved
+          );
+        }
+        // Pattern: add image / media guidelines
+        else if (lower.match(/image|photo|media|visual|graphic/)) {
+          const newSection = `\n\n## Media & Visual Guidelines\n\n### Images\n- Hero/banner images: minimum 1400\u00d7400px, 16:9 aspect ratio preferred\n- Inline images: maximum 800px wide, compressed for web\n- Use approved brand photography; avoid generic stock photos\n- All images **must** include descriptive alt text\n\n### Videos\n- Host on Microsoft Stream; embed using the Stream web part\n- Include captions or a transcript for accessibility\n- Keep promotional videos under 3 minutes\n\n### Icons & Graphics\n- Use Fluent UI icons for consistency with the Microsoft design system\n- Custom graphics should follow the ODSP brand color palette\n`;
+          addChatMessage(
+            "I've drafted a comprehensive Media & Visual Guidelines section covering images, videos, and icons/graphics with specific sizing and accessibility requirements.",
+            'ai',
+            currentContent + newSection
+          );
+        }
+        // Pattern: add archive / governance
+        else if (lower.match(/archiv|governance|outdated|old content|stale/)) {
+          const newSection = `\n\n## Archival & Content Lifecycle\n\n- Content older than **6 months** without an update should be reviewed\n- Pages with no views in the last 90 days are candidates for archival\n- Archived pages are moved to the \u201CArchive\u201D section (not deleted)\n- Event pages are automatically archived 30 days after the event date\n- Annual review: all sections of this site undergo a full content audit in Q4\n`;
+          addChatMessage(
+            "I've drafted an Archival & Content Lifecycle section with clear time-based rules for content review, archival, and the annual audit cycle.",
+            'ai',
+            currentContent + newSection
+          );
+        }
+        // Pattern: add search / SEO section
+        else if (lower.match(/search|seo|tag|metadata|discover/)) {
+          const newSection = `\n\n## Search & Discoverability\n\n- Add **page properties** (description, category, owner) to every page\n- Use relevant **managed metadata tags** from the ODSP term store\n- Page titles should be clear and descriptive (no abbreviations without context)\n- Include a 1-2 sentence summary in the page description field\n- Avoid duplicate page titles across the site\n`;
+          addChatMessage(
+            "I've drafted a Search & Discoverability section with guidelines for metadata, tagging, titles, and descriptions.",
+            'ai',
+            currentContent + newSection
+          );
+        }
+        // Pattern: add content approval process
+        else if (lower.match(/approv|review|workflow|publish/)) {
+          const newSection = `\n\n## Content Approval Process\n\n1. **Draft** \u2014 Author creates or edits a page (saved as draft)\n2. **Review** \u2014 Author requests review from the relevant section owner\n3. **Feedback** \u2014 Reviewer provides feedback via page comments\n4. **Approve** \u2014 Section owner approves and the author publishes\n5. **Announce** \u2014 For major updates, post in the #odsp-announcements Teams channel\n\n> **Note:** Minor edits (typo fixes, link updates) can be published directly without review.\n`;
+          addChatMessage(
+            "I've drafted a Content Approval Process section with a 5-step workflow from draft through announcement, including an exception for minor edits.",
+            'ai',
+            currentContent + newSection
+          );
+        }
+        // Generic / fallback
+        else {
+          const responses = [
+            "I'd be happy to help with that! Could you be a bit more specific about what you'd like to add or change? For example, you could ask me to:<br><br>\u2022 Add a new section (e.g., \"Add a section about content approval\")<br>\u2022 Improve existing content (e.g., \"Rewrite the purpose section\")<br>\u2022 Get suggestions (e.g., \"What sections am I missing?\")",
+            "I can help draft that for you. Try telling me specifically what section to add or which part to rewrite, and I'll generate the markdown and let you apply it to the editor.",
+            "Good question! To help you best, I work well with specific requests like \"Add guidelines for images\" or \"Create a section about permissions.\" What would you like me to focus on?"
+          ];
+          addChatMessage(responses[Math.floor(Math.random() * responses.length)], 'ai');
+        }
+      }, delay);
+    }
+
+    // Send chat
+    chatSend.addEventListener('click', () => {
+      const msg = chatInput.value.trim();
+      if (!msg) return;
+      chatInput.value = '';
+      chatInput.style.height = 'auto';
+      handleChat(msg);
+    });
+    chatInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        chatSend.click();
+      }
+    });
+    // Auto-resize chat input
+    chatInput.addEventListener('input', () => {
+      chatInput.style.height = 'auto';
+      chatInput.style.height = Math.min(chatInput.scrollHeight, 80) + 'px';
+    });
+
+    // Close README on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (readmeOverlay.classList.contains('active')) {
+          closeReadmeOverlay();
+          e.stopPropagation();
+          return;
+        }
+        searchModal.classList.remove('active');
+        notifPanel.classList.remove('active');
+      }
+    });
+
+    // ===== Existing Features =====
+
+    // Search Modal
+    const searchInput = document.getElementById('searchInput');
+    const searchModal = document.getElementById('searchModal');
+    const modalSearchInput = document.getElementById('modalSearchInput');
+    const searchResults = document.getElementById('searchResults');
+
+    searchInput.addEventListener('focus', () => {
+      searchModal.classList.add('active');
+      setTimeout(() => modalSearchInput.focus(), 100);
+    });
+
+    searchModal.addEventListener('click', (e) => {
+      if (e.target === searchModal) searchModal.classList.remove('active');
+    });
+
+    const searchData = [
+      'ODSP FY26 Vision Day',
+      'New Employee Hub',
+      'Engineering Resources',
+      'Team Events Calendar',
+      'OKRs & Goals Dashboard',
+      'Rhythm of the Business',
+      'Quarterly Planning Guide',
+      'OneDrive Developer Docs',
+      'SharePoint Migration Toolkit',
+      'ODSP All Hands Recordings',
+      'Site README'
+    ];
+
+    modalSearchInput.addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase();
+      if (!query) {
+        searchResults.innerHTML = '<div class="search-hint">Try searching for "Vision Day", "Teams", or "Events"</div>';
+        return;
+      }
+      const matches = searchData.filter(item => item.toLowerCase().includes(query));
+      if (matches.length === 0) {
+        searchResults.innerHTML = '<div class="search-hint">No results found</div>';
+      } else {
+        searchResults.innerHTML = matches.map(m => {
+          if (m === 'Site README') {
+            return `<div class="search-result-item" onclick="document.getElementById('searchModal').classList.remove('active'); document.getElementById('readmeBadge').click();">&#128196; ${m}</div>`;
+          }
+          return `<div class="search-result-item" onclick="showToast('Opening: ${m}'); document.getElementById('searchModal').classList.remove('active');">&#128196; ${m}</div>`;
+        }).join('');
+      }
+    });
+
+    // Notification Panel
+    const notifBtn = document.getElementById('notifBtn');
+    const notifPanel = document.getElementById('notifPanel');
+    const closeNotifBtn = document.getElementById('closeNotifBtn');
+
+    notifBtn.addEventListener('click', () => {
+      notifPanel.classList.toggle('active');
+    });
+    closeNotifBtn.addEventListener('click', () => {
+      notifPanel.classList.remove('active');
+    });
+
+    // CTA Button
+    document.getElementById('ctaBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      showToast('Opening Vision Day videos and deck...');
+    });
+
+    // Sidebar buttons
+    document.querySelectorAll('.sidebar .sb-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.sidebar .sb-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const name = btn.querySelector('.tooltip').textContent;
+        showToast(`Navigating to ${name}...`);
+      });
+    });
+
+    // Republish button
+    document.querySelector('.btn-republish').addEventListener('click', () => {
+      showToast('Page republished successfully!');
+    });
+
+    // Edit button
+    document.querySelector('.btn-edit').addEventListener('click', () => {
+      showToast('Entering edit mode...');
+    });
+
+    // Share button
+    document.querySelector('.btn-share').addEventListener('click', () => {
+      showToast('Share dialog would open here');
+    });
+
+    // Toast helper
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      toast.style.opacity = '1';
+      clearTimeout(toast._timer);
+      toast._timer = setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.style.display = 'none', 300);
+      }, 2500);
+    }
+  </script>
+</body>
+</html>
